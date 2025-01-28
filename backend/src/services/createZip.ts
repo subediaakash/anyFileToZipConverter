@@ -5,6 +5,7 @@ import archiver from "archiver";
 export const createZip = async (file: Express.Multer.File): Promise<string> => {
   const zipFileName = `${file.originalname}.zip`;
   const zipFilePath = path.join(__dirname, "../../zips", zipFileName);
+
   const output = fs.createWriteStream(zipFilePath);
   const archive = archiver("zip", { zlib: { level: 9 } });
 

@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import path from "path";
+import fs from "fs";
 
 import { createZip } from "../services/createZip";
 
@@ -22,12 +24,25 @@ export const uploadFile = async (req: Request, res: Response) => {
 };
 
 export const downloadZip = (req: Request, res: Response) => {
-  const { fileName } = req.params;
-  const filePath = `${__dirname}/../../zips/${fileName}`;
-  res.download(filePath, fileName, (err) => {
+  const { filename } = req.params;
+
+  const decodedFilename = decodeURIComponent(filename);
+
+  const filePath = path.resolve(__dirname, "../../zips", decodedFilename);
+
+  console.log("Requested Filename:", decodedFilename);
+  console.log("Resolved File Path:", filePath);
+
+  if (!fs.existsSync(filePath)) {
+    console.error("File not found:", filePath);
+    res.status(404).json({ message: "File not found" });
+    return;
+  }
+
+  res.download(filePath, decodedFilename, (err) => {
     if (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
+      console.error("Error downloading file:", err);
+      res.status(500).json({ message: "Error downloading file" });
     }
   });
 };
